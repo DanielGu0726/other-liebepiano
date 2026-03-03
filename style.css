@@ -128,7 +128,6 @@ body {
 .hero {
     height: 100vh;
     min-height: 600px;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -136,23 +135,35 @@ body {
     color: var(--white);
     position: relative;
     margin-top: 70px;
+    overflow: hidden;
 }
 
-.hero::before {
-    content: '';
+.hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    object-fit: cover;
+}
+
+.hero-overlay {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><path d="M0,100 Q300,50 600,100 T1200,100 L1200,600 L0,600 Z" fill="rgba(255,255,255,0.05)"/></svg>') no-repeat center;
-    background-size: cover;
-    opacity: 0.3;
+    background: linear-gradient(135deg, rgba(139, 111, 92, 0.75) 0%, rgba(92, 74, 58, 0.75) 100%);
+    z-index: 1;
 }
 
 .hero-content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     animation: fadeInUp 1s ease;
 }
 
@@ -276,7 +287,7 @@ section {
     padding: 40px 30px;
     border-radius: 15px;
     box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-    text-align: center;
+    text-align: left;
     transition: all 0.3s ease;
 }
 
@@ -288,19 +299,64 @@ section {
 .program-icon {
     font-size: 48px;
     margin-bottom: 20px;
+    text-align: center;
 }
 
 .program-card h3 {
     font-size: 24px;
     margin-bottom: 10px;
     color: var(--primary-color);
+    text-align: center;
 }
 
 .program-age {
     font-size: 14px;
     color: var(--accent);
     font-weight: 600;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.program-goal {
+    font-size: 15px;
+    color: var(--primary-color);
+    font-weight: 600;
     margin-bottom: 15px;
+    text-align: center;
+}
+
+.program-details {
+    list-style: none;
+    margin: 20px 0;
+    padding: 0;
+}
+
+.program-details li {
+    font-size: 14px;
+    color: var(--text-light);
+    padding: 6px 0;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.6;
+}
+
+.program-details li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.program-note {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-light);
+    background: var(--bg-light);
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-style: italic;
 }
 
 .program-card p {
@@ -315,8 +371,8 @@ section {
 }
 
 .instructor-content {
-    max-width: 800px;
-    margin: 0 auto;
+    max-width: 900px;
+    margin: 0 auto 60px;
     background: var(--white);
     padding: 50px;
     border-radius: 15px;
@@ -363,6 +419,93 @@ section {
     font-weight: bold;
 }
 
+.instructor-philosophy {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-light);
+    background: var(--bg-light);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+/* 관현악반 강사진 */
+.orchestra-instructors {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.orchestra-title {
+    font-size: 32px;
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.orchestra-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+}
+
+.instructor-card {
+    background: var(--white);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.instructor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.instructor-card h4 {
+    font-size: 24px;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.instructor-subject {
+    font-size: 16px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 25px;
+}
+
+.instructor-card h5 {
+    font-size: 18px;
+    color: var(--text-dark);
+    margin: 20px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--bg-light);
+}
+
+.instructor-card ul {
+    list-style: none;
+    margin-bottom: 15px;
+}
+
+.instructor-card li {
+    font-size: 14px;
+    color: var(--text-light);
+    padding: 5px 0;
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.6;
+}
+
+.instructor-card li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
 /* 연락처 섹션 */
 .contact-grid {
     display: grid;
@@ -401,18 +544,13 @@ section {
     border-radius: 10px;
     overflow: hidden;
     min-height: 400px;
+    height: 450px;
 }
 
-.map-placeholder {
+.contact-map iframe {
     width: 100%;
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: var(--text-light);
-    font-size: 18px;
-    padding: 40px;
+    display: block;
 }
 
 /* 푸터 */
@@ -507,6 +645,11 @@ html {
         grid-template-columns: 1fr;
     }
 
+    .contact-map {
+        min-height: 300px;
+        height: 350px;
+    }
+
     .footer-content {
         flex-direction: column;
         gap: 30px;
@@ -516,8 +659,41 @@ html {
         padding: 30px 20px;
     }
 
+    .orchestra-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .instructor-card {
+        padding: 30px 20px;
+    }
+
+    .orchestra-title {
+        font-size: 28px;
+    }
+
+    .programs-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .program-card {
+        padding: 30px 20px;
+    }
+
     section {
         padding: 60px 0;
+    }
+
+    /* 모바일에서는 비디오 숨기고 그라데이션 배경 사용 */
+    .hero-video {
+        display: none;
+    }
+
+    .hero {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    }
+
+    .hero-overlay {
+        background: rgba(0, 0, 0, 0.2);
     }
 }
 

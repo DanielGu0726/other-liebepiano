@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>갤러리 - 리베 피아노</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .gallery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 20px 60px;
+        }
+
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .gallery-header h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .gallery-header p {
+            font-size: 18px;
+            color: var(--text-light);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .gallery-item {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item-info {
+            padding: 20px;
+        }
+
+        .gallery-item-info h3 {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .gallery-item-info p {
+            font-size: 14px;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 18px;
+            color: var(--text-light);
+        }
+
+        .error {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 18px;
+            color: #e74c3c;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 40px;
+            font-weight: 300;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .lightbox-info {
+            color: white;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .lightbox-info h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .lightbox-info p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gallery-header h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header id="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">Liebe Piano</h1>
+                <nav class="nav-desktop">
+                    <ul>
+                        <li><a href="index.html#home">홈</a></li>
+                        <li><a href="index.html#about">소개</a></li>
+                        <li><a href="index.html#programs">프로그램</a></li>
+                        <li><a href="index.html#instructor">강사소개</a></li>
+                        <li><a href="gallery.html" class="active">갤러리</a></li>
+                        <li><a href="index.html#contact">오시는길</a></li>
+                    </ul>
+                </nav>
+                <button class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 모바일 메뉴 -->
+    <nav class="nav-mobile" id="navMobile">
+        <ul>
+            <li><a href="index.html#home">홈</a></li>
+            <li><a href="index.html#about">소개</a></li>
+            <li><a href="index.html#programs">프로그램</a></li>
+            <li><a href="index.html#instructor">강사소개</a></li>
+            <li><a href="gallery.html">갤러리</a></li>
+            <li><a href="index.html#contact">오시는길</a></li>
+        </ul>
+    </nav>
+
+    <!-- 갤러리 -->
+    <div class="gallery-container">
+        <div class="gallery-header">
+            <h1>갤러리</h1>
+            <p>리베 피아노의 아름다운 순간들을 함께 나눕니다</p>
+        </div>
+
+        <div id="galleryContent">
+            <div class="loading">갤러리를 불러오는 중...</div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+            <img id="lightboxImage" src="" alt="">
+            <div class="lightbox-info">
+                <h3 id="lightboxTitle"></h3>
+                <p id="lightboxDescription"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>Liebe Piano</h3>
+                    <p>리베 피아노 | 대표: 임명순<br>
+                    사업자등록번호: 252-94-01797<br>
+                    Tel: 010-8906-4267</p>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-link">Instagram</a>
+                    <a href="#" class="social-link">YouTube</a>
+                    <a href="#" class="social-link">Blog</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Liebe Piano. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = 'https://liebe-piano-gallery.tjmds99.workers.dev';
+
+        // Load gallery
+        async function loadGallery() {
+            try {
+                const response = await fetch(`${API_URL}/api/images`);
+                const images = await response.json();
+
+                const container = document.getElementById('galleryContent');
+
+                if (images.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>아직 갤러리 이미지가 없습니다</h3>
+                            <p>곧 멋진 사진들로 채워질 예정입니다</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const gridHTML = images.map(img => `
+                    <div class="gallery-item" onclick="openLightbox('${API_URL}/images/${img.image_key}', '${escapeHtml(img.title || '')}', '${escapeHtml(img.description || '')}')">
+                        <img src="${API_URL}/images/${img.image_key}" alt="${escapeHtml(img.title || img.filename)}" loading="lazy">
+                        ${img.title || img.description ? `
+                            <div class="gallery-item-info">
+                                ${img.title ? `<h3>${escapeHtml(img.title)}</h3>` : ''}
+                                ${img.description ? `<p>${escapeHtml(img.description)}</p>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+
+                container.innerHTML = `<div class="gallery-grid">${gridHTML}</div>`;
+            } catch (error) {
+                document.getElementById('galleryContent').innerHTML = `
+                    <div class="error">갤러리를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.</div>
+                `;
+            }
+        }
+
+        function openLightbox(src, title, description) {
+            document.getElementById('lightboxImage').src = src;
+            document.getElementById('lightboxTitle').textContent = title;
+            document.getElementById('lightboxDescription').textContent = description;
+            document.getElementById('lightbox').classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close lightbox on background click
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLightbox();
+            }
+        });
+
+        // Close lightbox on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+
+        // Mobile menu
+        const menuToggle = document.getElementById('menuToggle');
+        const navMobile = document.getElementById('navMobile');
+        const header = document.getElementById('header');
+
+        menuToggle.addEventListener('click', () => {
+            navMobile.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+        });
+
+        const mobileLinks = document.querySelectorAll('.nav-mobile a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navMobile.classList.remove('active');
+                menuToggle.classList.remove('active');
+            });
+        });
+
+        // Scroll header
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            if (currentScroll > 100) {
+                header.style.padding = '10px 0';
+                header.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            } else {
+                header.style.padding = '20px 0';
+                header.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            }
+        });
+
+        // Load gallery on page load
+        loadGallery();
+    </script>
+</body>
+</html>

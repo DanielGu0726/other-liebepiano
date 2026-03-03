@@ -97,4 +97,12 @@ window.addEventListener('scroll', () => {
 // 페이지 로드시 애니메이션
 window.addEventListener('load', () => {
     document.body.style.opacity = '1';
+
+    // 히어로 비디오 자동 재생 확인
+    const heroVideo = document.querySelector('.hero-video');
+    if (heroVideo) {
+        heroVideo.play().catch(err => {
+            console.log('비디오 자동 재생 실패:', err);
+        });
+    }
 });

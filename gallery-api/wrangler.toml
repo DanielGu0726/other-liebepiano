@@ -1,0 +1,18 @@
+name = "liebe-piano-gallery"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "liebe-piano-gallery-db"
+database_id = "ca8ba2cc-d9b1-4cce-8aed-c5b18e6c65f7"
+
+# R2 Bucket
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "liebe-piano-images"
+
+# CORS settings
+[vars]
+ADMIN_PASSWORD = "liebe2026admin"
