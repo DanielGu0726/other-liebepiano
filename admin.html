@@ -154,6 +154,24 @@
             border-radius: 8px;
         }
 
+        .preview-video {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        .file-size-info {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .file-size-info.error {
+            color: #e74c3c;
+        }
+
         /* Gallery Management */
         .gallery-management {
             background: white;
@@ -317,25 +335,28 @@
 
             <!-- Upload Section -->
             <div class="upload-section">
-                <h2>이미지 업로드</h2>
+                <h2>이미지/영상 업로드</h2>
                 <form id="uploadForm" onsubmit="uploadImage(event)">
                     <div class="file-input-wrapper">
-                        <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
+                        <input type="file" id="imageFile" accept="image/*,video/*" onchange="previewFile(event)">
                         <label for="imageFile" class="file-input-label" id="fileLabel">
-                            <p style="margin:0; color: var(--primary-color); font-size: 18px;">📷</p>
-                            <p style="margin:10px 0 0 0;">클릭하여 이미지 선택</p>
+                            <p style="margin:0; color: var(--primary-color); font-size: 18px;">📷 🎥</p>
+                            <p style="margin:10px 0 0 0;">클릭하여 이미지 또는 영상 선택</p>
+                            <p style="margin:5px 0 0 0; font-size: 13px; color: var(--text-light);">최대 25MB</p>
                         </label>
                         <img id="preview" class="preview-image" style="display:none;">
+                        <video id="videoPreview" class="preview-video" controls style="display:none;"></video>
+                        <p id="fileSizeInfo" class="file-size-info" style="display:none;"></p>
                     </div>
 
                     <div class="form-group">
                         <label for="title">제목 (선택)</label>
-                        <input type="text" id="title" placeholder="이미지 제목">
+                        <input type="text" id="title" placeholder="제목 입력">
                     </div>
 
                     <div class="form-group">
                         <label for="description">설명 (선택)</label>
-                        <textarea id="description" placeholder="이미지 설명"></textarea>
+                        <textarea id="description" placeholder="설명 입력"></textarea>
                     </div>
 
                     <button type="submit" class="btn" id="uploadBtn">업로드</button>
@@ -344,10 +365,10 @@
 
             <!-- Gallery Management -->
             <div class="gallery-management">
-                <h2>업로드된 이미지</h2>
+                <h2>업로드된 콘텐츠</h2>
                 <div id="adminGallery" class="admin-gallery-grid">
                     <div style="text-align:center; padding:40px; grid-column: 1/-1;">
-                        이미지를 불러오는 중...
+                        콘텐츠를 불러오는 중...
                     </div>
                 </div>
             </div>
@@ -380,22 +401,60 @@
             document.getElementById('password').value = '';
         }
 
-        // Preview image
-        function previewImage(event) {
+        // Preview file (image or video)
+        function previewFile(event) {
             const file = event.target.files[0];
-            if (file) {
+            const preview = document.getElementById('preview');
+            const videoPreview = document.getElementById('videoPreview');
+            const fileSizeInfo = document.getElementById('fileSizeInfo');
+            const fileLabel = document.getElementById('fileLabel');
+
+            // Hide both previews first
+            preview.style.display = 'none';
+            videoPreview.style.display = 'none';
+            fileSizeInfo.style.display = 'none';
+
+            if (!file) {
+                fileLabel.classList.remove('has-file');
+                return;
+            }
+
+            // Check file size (25MB limit)
+            const maxSize = 25 * 1024 * 1024; // 25MB
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+
+            fileSizeInfo.style.display = 'block';
+            if (file.size > maxSize) {
+                fileSizeInfo.textContent = `파일 크기: ${fileSizeMB}MB (최대 25MB 초과!)`;
+                fileSizeInfo.classList.add('error');
+                fileLabel.classList.remove('has-file');
+                return;
+            } else {
+                fileSizeInfo.textContent = `파일 크기: ${fileSizeMB}MB`;
+                fileSizeInfo.classList.remove('error');
+            }
+
+            fileLabel.classList.add('has-file');
+
+            // Preview based on file type
+            if (file.type.startsWith('video/')) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const preview = document.getElementById('preview');
+                    videoPreview.src = e.target.result;
+                    videoPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
-                    document.getElementById('fileLabel').classList.add('has-file');
                 };
                 reader.readAsDataURL(file);
             }
         }
 
-        // Upload image
+        // Upload image or video
         async function uploadImage(event) {
             event.preventDefault();
 
@@ -403,7 +462,14 @@
             const file = fileInput.files[0];
 
             if (!file) {
-                showMessage('이미지를 선택해주세요', false);
+                showMessage('파일을 선택해주세요', false);
+                return;
+            }
+
+            // Check file size (25MB limit)
+            const maxSize = 25 * 1024 * 1024;
+            if (file.size > maxSize) {
+                showMessage('파일 크기가 25MB를 초과합니다', false);
                 return;
             }
 
@@ -434,9 +500,12 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    showMessage('이미지가 성공적으로 업로드되었습니다!', true);
+                    const fileType = result.file_type === 'video' ? '영상' : '이미지';
+                    showMessage(`${fileType}가 성공적으로 업로드되었습니다!`, true);
                     document.getElementById('uploadForm').reset();
                     document.getElementById('preview').style.display = 'none';
+                    document.getElementById('videoPreview').style.display = 'none';
+                    document.getElementById('fileSizeInfo').style.display = 'none';
                     document.getElementById('fileLabel').classList.remove('has-file');
                     loadAdminGallery();
                 } else {
@@ -454,29 +523,36 @@
         async function loadAdminGallery() {
             try {
                 const response = await fetch(`${API_URL}/api/images`);
-                const images = await response.json();
+                const items = await response.json();
 
                 const container = document.getElementById('adminGallery');
 
-                if (images.length === 0) {
+                if (items.length === 0) {
                     container.innerHTML = `
                         <div style="text-align:center; padding:40px; grid-column: 1/-1; color: var(--text-light);">
-                            아직 업로드된 이미지가 없습니다
+                            아직 업로드된 콘텐츠가 없습니다
                         </div>
                     `;
                     return;
                 }
 
-                container.innerHTML = images.map(img => `
-                    <div class="admin-gallery-item">
-                        <img src="${API_URL}/images/${img.image_key}" alt="${escapeHtml(img.title || img.filename)}">
-                        <div class="admin-gallery-item-info">
-                            ${img.title ? `<h4>${escapeHtml(img.title)}</h4>` : ''}
-                            ${img.description ? `<p>${escapeHtml(img.description)}</p>` : ''}
-                            <button class="delete-btn" onclick="deleteImage(${img.id}, '${escapeHtml(img.title || img.filename)}')">삭제</button>
+                container.innerHTML = items.map(item => {
+                    const isVideo = item.file_type === 'video';
+                    const mediaHtml = isVideo
+                        ? `<video src="${API_URL}/images/${item.image_key}" controls style="width:100%; height:200px; object-fit:cover;"></video>`
+                        : `<img src="${API_URL}/images/${item.image_key}" alt="${escapeHtml(item.title || item.filename)}">`;
+
+                    return `
+                        <div class="admin-gallery-item">
+                            ${mediaHtml}
+                            <div class="admin-gallery-item-info">
+                                ${item.title ? `<h4>${escapeHtml(item.title)}</h4>` : ''}
+                                ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ''}
+                                <button class="delete-btn" onclick="deleteImage(${item.id}, '${escapeHtml(item.title || item.filename)}')">삭제</button>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             } catch (error) {
                 document.getElementById('adminGallery').innerHTML = `
                     <div style="text-align:center; padding:40px; grid-column: 1/-1; color: #e74c3c;">

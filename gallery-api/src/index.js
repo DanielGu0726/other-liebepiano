@@ -49,11 +49,11 @@ export default {
 };
 
 /**
- * Get all gallery images
+ * Get all gallery images and videos
  */
 async function getImages(env, corsHeaders) {
 	const { results } = await env.DB.prepare(
-		'SELECT id, filename, title, description, image_key, created_at, display_order FROM gallery_images ORDER BY display_order DESC, created_at DESC'
+		'SELECT id, filename, title, description, image_key, file_type, created_at, display_order FROM gallery_images ORDER BY display_order DESC, created_at DESC'
 	).all();
 
 	return new Response(JSON.stringify(results), {
@@ -65,7 +65,7 @@ async function getImages(env, corsHeaders) {
 }
 
 /**
- * Upload new image
+ * Upload new image or video
  */
 async function uploadImage(request, env, corsHeaders) {
 	// Check admin password
@@ -83,7 +83,30 @@ async function uploadImage(request, env, corsHeaders) {
 	const description = formData.get('description') || '';
 
 	if (!file) {
-		return new Response(JSON.stringify({ error: 'No image provided' }), {
+		return new Response(JSON.stringify({ error: 'No file provided' }), {
+			status: 400,
+			headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+		});
+	}
+
+	// Check file size (25MB limit)
+	const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB in bytes
+	if (file.size > MAX_FILE_SIZE) {
+		return new Response(JSON.stringify({ error: 'File size exceeds 25MB limit' }), {
+			status: 400,
+			headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+		});
+	}
+
+	// Determine file type
+	const fileType = file.type.startsWith('video/') ? 'video' : 'image';
+
+	// Validate file type
+	const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+	const allowedVideoTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
+
+	if (!allowedImageTypes.includes(file.type) && !allowedVideoTypes.includes(file.type)) {
+		return new Response(JSON.stringify({ error: 'Invalid file type. Allowed: JPG, PNG, GIF, WebP, MP4, WebM, MOV, AVI' }), {
 			status: 400,
 			headers: { ...corsHeaders, 'Content-Type': 'application/json' },
 		});
@@ -104,9 +127,9 @@ async function uploadImage(request, env, corsHeaders) {
 
 	// Save to D1
 	const result = await env.DB.prepare(
-		'INSERT INTO gallery_images (filename, title, description, image_key) VALUES (?, ?, ?, ?)'
+		'INSERT INTO gallery_images (filename, title, description, image_key, file_type) VALUES (?, ?, ?, ?, ?)'
 	)
-		.bind(originalName, title, description, imageKey)
+		.bind(originalName, title, description, imageKey, fileType)
 		.run();
 
 	return new Response(
@@ -114,6 +137,7 @@ async function uploadImage(request, env, corsHeaders) {
 			success: true,
 			id: result.meta.last_row_id,
 			image_key: imageKey,
+			file_type: fileType,
 		}),
 		{
 			headers: { ...corsHeaders, 'Content-Type': 'application/json' },

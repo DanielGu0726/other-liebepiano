@@ -224,7 +224,8 @@
     <div class="lightbox" id="lightbox">
         <div class="lightbox-content">
             <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-            <img id="lightboxImage" src="" alt="">
+            <img id="lightboxImage" src="" alt="" style="display:none;">
+            <video id="lightboxVideo" controls style="display:none; max-width:100%; max-height:90vh;"></video>
             <div class="lightbox-info">
                 <h3 id="lightboxTitle"></h3>
                 <p id="lightboxDescription"></p>
@@ -261,31 +262,38 @@
         async function loadGallery() {
             try {
                 const response = await fetch(`${API_URL}/api/images`);
-                const images = await response.json();
+                const items = await response.json();
 
                 const container = document.getElementById('galleryContent');
 
-                if (images.length === 0) {
+                if (items.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
-                            <h3>아직 갤러리 이미지가 없습니다</h3>
-                            <p>곧 멋진 사진들로 채워질 예정입니다</p>
+                            <h3>아직 갤러리 콘텐츠가 없습니다</h3>
+                            <p>곧 멋진 사진과 영상으로 채워질 예정입니다</p>
                         </div>
                     `;
                     return;
                 }
 
-                const gridHTML = images.map(img => `
-                    <div class="gallery-item" onclick="openLightbox('${API_URL}/images/${img.image_key}', '${escapeHtml(img.title || '')}', '${escapeHtml(img.description || '')}')">
-                        <img src="${API_URL}/images/${img.image_key}" alt="${escapeHtml(img.title || img.filename)}" loading="lazy">
-                        ${img.title || img.description ? `
-                            <div class="gallery-item-info">
-                                ${img.title ? `<h3>${escapeHtml(img.title)}</h3>` : ''}
-                                ${img.description ? `<p>${escapeHtml(img.description)}</p>` : ''}
-                            </div>
-                        ` : ''}
-                    </div>
-                `).join('');
+                const gridHTML = items.map(item => {
+                    const isVideo = item.file_type === 'video';
+                    const mediaHtml = isVideo
+                        ? `<video src="${API_URL}/images/${item.image_key}" style="width:100%; height:300px; object-fit:cover;" muted></video>`
+                        : `<img src="${API_URL}/images/${item.image_key}" alt="${escapeHtml(item.title || item.filename)}" loading="lazy">`;
+
+                    return `
+                        <div class="gallery-item" onclick="openLightbox('${API_URL}/images/${item.image_key}', '${escapeHtml(item.title || '')}', '${escapeHtml(item.description || '')}', ${isVideo})">
+                            ${mediaHtml}
+                            ${item.title || item.description ? `
+                                <div class="gallery-item-info">
+                                    ${item.title ? `<h3>${escapeHtml(item.title)}</h3>` : ''}
+                                    ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
 
                 container.innerHTML = `<div class="gallery-grid">${gridHTML}</div>`;
             } catch (error) {
@@ -295,14 +303,29 @@
             }
         }
 
-        function openLightbox(src, title, description) {
-            document.getElementById('lightboxImage').src = src;
+        function openLightbox(src, title, description, isVideo) {
+            const lightboxImage = document.getElementById('lightboxImage');
+            const lightboxVideo = document.getElementById('lightboxVideo');
+
+            if (isVideo) {
+                lightboxImage.style.display = 'none';
+                lightboxVideo.style.display = 'block';
+                lightboxVideo.src = src;
+            } else {
+                lightboxVideo.style.display = 'none';
+                lightboxImage.style.display = 'block';
+                lightboxImage.src = src;
+            }
+
             document.getElementById('lightboxTitle').textContent = title;
             document.getElementById('lightboxDescription').textContent = description;
             document.getElementById('lightbox').classList.add('active');
         }
 
         function closeLightbox() {
+            const lightboxVideo = document.getElementById('lightboxVideo');
+            lightboxVideo.pause();
+            lightboxVideo.src = '';
             document.getElementById('lightbox').classList.remove('active');
         }
 
