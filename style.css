@@ -52,6 +52,12 @@ body {
     font-weight: 700;
     color: var(--primary-color);
     letter-spacing: 1px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.logo:hover {
+    color: var(--secondary-color);
 }
 
 .nav-desktop ul {
