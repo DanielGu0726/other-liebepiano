@@ -688,19 +688,6 @@ html {
     section {
         padding: 60px 0;
     }
-
-    /* 모바일에서는 비디오 숨기고 그라데이션 배경 사용 */
-    .hero-video {
-        display: none;
-    }
-
-    .hero {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    }
-
-    .hero-overlay {
-        background: rgba(0, 0, 0, 0.2);
-    }
 }
 
 @media (min-width: 769px) {
