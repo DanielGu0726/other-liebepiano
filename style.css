@@ -567,9 +567,6 @@ section {
 }
 
 .footer-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
     margin-bottom: 30px;
     padding-bottom: 30px;
     border-bottom: 1px solid rgba(255,255,255,0.2);
@@ -584,22 +581,6 @@ section {
     font-size: 14px;
     opacity: 0.8;
     line-height: 1.8;
-}
-
-.footer-social {
-    display: flex;
-    gap: 20px;
-}
-
-.social-link {
-    color: var(--white);
-    text-decoration: none;
-    font-size: 16px;
-    transition: color 0.3s ease;
-}
-
-.social-link:hover {
-    color: var(--accent);
 }
 
 .footer-bottom {
@@ -654,11 +635,6 @@ html {
     .contact-map {
         min-height: 300px;
         height: 350px;
-    }
-
-    .footer-content {
-        flex-direction: column;
-        gap: 30px;
     }
 
     .instructor-content {
