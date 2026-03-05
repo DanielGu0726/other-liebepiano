@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /gallery-api/
+
+Sitemap: https://liebepiano.com/sitemap.xml
